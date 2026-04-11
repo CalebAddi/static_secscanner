@@ -31,26 +31,33 @@ class ScanResult:
 
 class BaseScanner(ABC):
     def __init__(self, target: str) -> None:
-        self.target = target
+        self._target = target
+        self._result = self._create_result()
 
     @property
     @abstractmethod
     def name(self) -> str:
-        pass #TODO
+        pass #Override
 
     @abstractmethod
     def run(self) -> ScanResult:
-        pass #TODO
+        pass #Override
 
     def _create_finding(
             self,
             title: str,
             desc: str,
             severity: Severity,
-            location: str,
+            loc: str,
             recommendation: str
     ) -> Finding:
-        pass #TODO
+        return Finding(
+            title = title,
+            description = desc,
+            Severity = severity,
+            location = loc,
+            recommendation = recommendation
+        )
 
     def _create_result(self) -> ScanResult:
-        pass #TODO
+        return ScanResult(scanner_name = self.name)
