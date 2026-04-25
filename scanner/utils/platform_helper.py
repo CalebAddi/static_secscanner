@@ -17,7 +17,7 @@ class Platform(Enum):
 
 
 class PlatformDetectionError(RuntimeError):
-    """Raised when the current platform cannot be identified or is unsupported."""
+    """ Raised when the current platform cannot be identified or is unsupported. """
 
 
 class PlatformHelper:
@@ -42,14 +42,14 @@ class PlatformHelper:
         return Path.home()
 
     def get_temp_dir(self) -> Path:
-        """Return the system temporary directory."""
+        """ Return the system temporary directory. """
         return Path(tempfile.gettempdir())
 
     def get_ssh_dir(self) -> Path:
         return self.get_home_dir() / ".ssh"
 
     def get_sensitive_paths(self) -> list[Path]:
-        """Return a catalogue of paths that are security-relevant on this platform."""
+        """ Return a catalogue of paths that are security relevant on this platform. """
         if self._platform == Platform.WINDOWS:
             return self._windows_sensitive_paths()
         elif self._platform in (Platform.MAC, Platform.LINUX):
@@ -94,7 +94,7 @@ class PlatformHelper:
         ]
 
         # Log files that exist on both Linux and macOS.
-        # Paths that are Linux-only or macOS-only are gated below so callers don't see phantom entries.
+        # Paths that are Linux only or macOS only are gated below so callers don't see phantom entries.
         common_logs: list[Path] = []
 
         if self._platform == Platform.LINUX:
@@ -125,7 +125,7 @@ class PlatformHelper:
         require_read: bool = True,
         include_dirs: bool = True,
     ) -> tuple[list[Path], list[tuple[Path, Exception]]]:
-        """Filter *paths* down to those that exist and are accessible."""
+        """ Filter paths down to those that exist and are accessible. """
         accessible: list[Path] = []
         skipped: list[tuple[Path, Exception]] = []
 
@@ -170,11 +170,11 @@ class PlatformHelper:
         return accessible, skipped
 
     def get_accessible_sensitive_paths(self) -> tuple[list[Path], list[tuple[Path, Exception]]]:
-        """Return accessible sensitive paths plus a full audit of what was skipped."""
+        """ Return accessible sensitive paths plus a full audit of what was skipped. """
         return self.filter_accessible_paths(self.get_sensitive_paths())
 
     def is_root_or_admin(self) -> bool:
-        """Return True if the current process has elevated privileges."""
+        """ Return True if the current process has elevated privileges. """
         if self._platform == Platform.WINDOWS:
             return _is_windows_admin()
         elif self._platform in (Platform.MAC, Platform.LINUX):
@@ -185,7 +185,7 @@ class PlatformHelper:
             )
 
 def _detect_platform() -> Platform:
-    """Detect the current platform from sys.platform."""
+    """ Detect the current platform from sys.platform. """
     if sys.platform.startswith("darwin"):
         return Platform.MAC
     elif sys.platform.startswith("linux"):
@@ -197,7 +197,7 @@ def _detect_platform() -> Platform:
 
 
 def _is_windows_admin() -> bool:
-    """Return True if the current Windows process has admin privileges."""
+    """ Return True if the current Windows process has admin privileges. """
     try:
         result = ctypes.windll.shell32.IsUserAnAdmin()
     except AttributeError as exc:
