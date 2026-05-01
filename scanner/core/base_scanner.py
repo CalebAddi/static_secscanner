@@ -15,7 +15,7 @@ class Severity(Enum):
 class Finding:
     title: str
     description: str
-    Severity: Severity
+    severity: Severity
     location: str
     recommendation: str
     timestamp: datetime = field(default_factory=datetime.now)
@@ -60,4 +60,5 @@ class BaseScanner(ABC):
         )
 
     def _create_result(self) -> ScanResult:
+        """By the time a subclass calls super().__init__() the name property is already resolved on the concrete instance."""
         return ScanResult(scanner_name = self.name)

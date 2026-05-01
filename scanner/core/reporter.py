@@ -22,9 +22,17 @@ _SEVERITY_ORDER: dict[Severity, int] = {
 _SEVERITY_COLORS: dict[Severity, str] = {
     Severity.CRITICAL: "bold red",
     Severity.HIGH: "red",
-    Severity.MEDIUM: "orange",
+    Severity.MEDIUM: "dark_orange",
     Severity.LOW: "yellow",
     Severity.INFO: "white",
+}
+
+_TABLE_COLUMN_WIDTHS: dict[str, int] = {
+    "Severity": 10,
+    "Title": 30,
+    "Location": 30,
+    "Description": 50,
+    "Recommendation": 50,
 }
 
 _console = Console()
@@ -34,7 +42,7 @@ class Reporter:
         if results is None:
             logger.warning("No scan results provided to Reporter.")
 
-        self._results = results
+        self._results = results if results is not None else []
         self._scan_time = datetime.now()
 
     def generate_report(self, save_to_file: bool = True) -> None:
@@ -51,19 +59,50 @@ class Reporter:
 
     def _print_summary(self) -> None:
         """ Print a high level summary of how many findings exist at each severity level and how many scanners ran. """
-        pass # TODO
+        severity_counts = self._severity_counts()
+        _console.print(f"[bold cyan]Scan Report - {self._scan_time.strftime('%Y-%m-%d %H:%M:%S')}[/bold cyan]")
+        _console.print(f"Total Scanners Ran: {len(self._results)}")
+        _console.print(f"Total number of findings: {len(self._collect_findings())}")
+        
+        for severity in _SEVERITY_ORDER:
+            count = severity_counts.get(severity, 0)
+            color = _SEVERITY_COLORS.get(severity, "white")
+            _console.print(f"[{color}]{severity.value}: {count}[/{color}]")
 
     def _print_findings_table(self) -> None:
         """ Renders structured rich table of all findings sorted by severity. """
-        pass # TODO
+        sorted_findings = self._sort_findings(self._collect_findings())
+        if not sorted_findings:
+            _console.print("[bold green]No findings detected![/bold green]")
+            return
+
+        table = Table(title = "Scan Findings", box = box.SIMPLE_HEAVY)
+
+        for column_name, width in _TABLE_COLUMN_WIDTHS.items():
+            table.add_column(column_name, style = "bold", width = width, overflow = "fold")
+
+        for finding in sorted_findings:
+            severity_color = _SEVERITY_COLORS.get(finding.severity, "white")
+            table.add_row(
+                f"[{severity_color}]{finding.severity.value}[/{severity_color}]",
+                finding.title,
+                finding.location,
+                finding.description,
+                finding.recommendation
+            )
+        _console.print(table)
 
     def _collect_findings(self) -> list[Finding]:
         """ Collect all findings from scan results into a combined list. """
-        pass # TODO
+        findings = list[Finding] = []
+        for result in self._results:
+            if result.findings:
+                findings.extend(result.findings)
+        return findings
 
     def _sort_findings(self, findings: list[Finding]) -> list[Finding]:
         """ Return sorted copy of findings by severity """
-        pass # TODO
+        return sorted(findings, key = lambda f: _SEVERITY_ORDER.get(f.severity, 999))
 
     def _build_report_text(self) -> str:
         """ 
