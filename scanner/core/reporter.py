@@ -125,8 +125,7 @@ class Reporter:
             count = severity_counts.get(severity, 0)
             lines.append(f"{severity.value}: {count}")
 
-        lines.append("")
-        lines.append("Findings:")
+        lines.append("\nFindings:\n")
         lines.append("-" * 80)
 
         if sorted_findings:
@@ -144,8 +143,7 @@ class Reporter:
         errors = [result for result in self._results if result.error is not None]
 
         if errors:
-            lines.append("")
-            lines.append("Scanner Errors:")
+            lines.append("\nScanner Errors:\n")
             lines.append("-" * 80)
 
             for result in errors:
