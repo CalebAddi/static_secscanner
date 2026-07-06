@@ -109,7 +109,52 @@ class Reporter:
         Build the plain text version of the report that gets saved to disk.
         Mirrors the terminal output but without rich markup since the file should be readable in any text editor honesly. 
         """
-        pass # TODO
+        lines = []
+
+        findings = self._collect_findings()
+        sorted_findings = self._sort_findings(findings)
+        severity_counts = self._severity_counts()
+
+        lines.append(f"Scan Report - {self._scan_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        lines.append("-" * 80)
+
+        lines.append(f"Total Scanners Ran: {len(self._results)}")
+        lines.append(f"Total Findings: {len(findings)}")
+
+        for severity in _SEVERITY_ORDER:
+            count = severity_counts.get(severity, 0)
+            lines.append(f"{severity.value}: {count}")
+
+        lines.append("")
+        lines.append("Findings:")
+        lines.append("-" * 80)
+
+        if sorted_findings:
+            for finding in sorted_findings:
+                lines.append(f"Severity: {finding.severity.value}")
+                lines.append(f"Title: {finding.title}")
+                lines.append(f"Location: {finding.location}")
+                lines.append(f"Description: {finding.description}")
+                lines.append(f"Recommendation: {finding.recommendation}")
+                lines.append("-" * 80)
+        else:
+            lines.append("No findings detected!")
+            lines.append("-" * 80)
+
+        errors = [result for result in self._results if result.error is not None]
+
+        if errors:
+            lines.append("")
+            lines.append("Scanner Errors:")
+            lines.append("-" * 80)
+
+            for result in errors:
+                lines.append(f"Scanner: {result.scanner_name}")
+                lines.append(f"Error: {result.error}")
+                lines.append("-" * 80)
+
+        return "\n".join(lines)
+
 
     def _save_report(self, content: str) -> Path:
         """ 
